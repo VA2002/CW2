@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!--Title-->
+    <title>Strawgoh | After School Classes Portal</title>
+    <!--Connecting to CSS-->
+    <link rel="stylesheet" href="styles.css" />
+    <!--Vue JS CDN-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.14/dist/vue.js"></script>
+    <!--Font Awesome CDN-->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <script
+      defer
+      src="https://use.fontawesome.com/releases/v5.15.4/js/all.js"
+    ></script>
+  </head>
+  <body>
+    <!--Within this App div, everything we want to display in our Vue App will be shown-->
+    <div id="App">
+      <!--The elements in this div will be displayed only if the conditions in the v-if are met-->
+      <div v-if="showProductPage && !showCartPage && !showCheckoutPage">
+        <!--Landing page featuring all the lessons/classes-->
+        <div id="Home">
+          <div class="Navigation">
+            &nbsp;&nbsp;
+            <!--Cart button with a disabled condition if the cart is empty-->
+            <button
+              id="Cart"
+              @click="showTheCartPage"
+              :disabled="cart.length === 0"
+            >
+              <i class="fa-solid fa-cart-shopping"></i>
+            </button>
+            <br />
+            <img id="Websitelogo" src="thelogo.png" />
+          </div>
+          <br />
+          <br />
+          <!--This contains all the filters-->
+          <div class="Sortbox">
+            <br />
+            <center>
+              <h1 id="Sortby">Sort by :</h1>
+              <br /><br />
+              <!--@click added to buttons to define the function they have-->
+              <div id="Filters">
+                Subject:
+                <button class="Ascdesc" id="Nameup" @click="nameAsc">
+                  <i class="fa-solid fa-arrow-up"></i>
+                </button>
+                <button class="Ascdesc" id="Namedown" @click="nameDesc">
+                  <i class="fa-solid fa-arrow-down"></i>
+                </button>
+                <br /><br />
+                Location:
+                <button class="Ascdesc" id="Locationup" @click="locationAsc">
+                  <i class="fa-solid fa-arrow-up"></i>
+                </button>
+                <button class="Ascdesc" id="Locationdown" @click="locationDesc">
+                  <i class="fa-solid fa-arrow-down"></i>
+                </button>
+                <br /><br />
+                Fee:
+                <button class="Ascdesc" id="Priceup" @click="priceAsc">
+                  <i class="fa-solid fa-arrow-up"></i>
+                </button>
+                <button class="Ascdesc" id="Pricedown" @click="priceDesc">
+                  <i class="fa-solid fa-arrow-down"></i>
+                </button>
+                <br /><br />
+                Teacher:
+                <button class="Ascdesc" id="Teacherup" @click="teacherAsc">
+                  <i class="fa-solid fa-arrow-up"></i>
+                </button>
+                <button class="Ascdesc" id="Teacherdown" @click="teacherDesc">
+                  <i class="fa-solid fa-arrow-down"></i>
+                </button>
+                <br /><br />
+                Availability:
+                <button class="Ascdesc" id="Spaceup" @click="spaceAsc">
+                  <i class="fa-solid fa-arrow-up"></i>
+                </button>
+                <button class="Ascdesc" id="Spacedown" @click="spaceDesc">
+                  <i class="fa-solid fa-arrow-down"></i>
+                </button>
+              </div>
+            </center>
+          </div>
+          <br />
+          <!--Search bar added along with a v-model, which is to equate the string within the search bar to the searchTerm variable-->
+          <input
+            type="text"
+            id="Search"
+            placeholder="Search Subject Name, Code, Location or Teacher Here..."
+            v-model="searchTerm"
+          />
+          <!--This div includes all the classes-->
+          <div class="Theclasses">
+            <table id="Classtable" cellspacing="15">
+              <!--VFor added here which loops through all elements of lessons array. VIf added to add a new row every time 3 classes are added to each row-->
+              <!--Mustache syntax used to call object properties-->
+              <tr
+                v-for="(lesson, index) in lessons"
+                :key="lesson._id"
+                v-if="index % 3 === 0"
+              >
+                <td v-for="i in 3" v-if="(index + i - 1) < lessons.length">
+                  <div class="Subjectbox">
+                    <div id="Subjectname">
+                      {{ lessons[index + i - 1].code }}:
+                      {{ lessons[index + i - 1].name }}
+                    </div>
+                    <div v-html="lessons[index + i - 1].fontawsm"></div>
+                    <div id="Subjectinfo">
+                      <b>Location: </b> {{ lessons[index + i - 1].location }}
+                      <br />
+                      <b>Fee: </b> £ {{ lessons[index + i - 1].price }}
+                      <br />
+                      <b>Teacher: </b> {{ lessons[index + i - 1].teacher }}
+                      <br />
+                      <b>Space: </b>
+                      <span v-if="lessons[index + i -1].space > 0">{{
+                        lessons[index + i - 1].space
+                      }}</span>
+                      <span style="color: rgb(158, 32, 32);" v-else
+                        >Unavailable</span
+                      >
+                      <br />
+                    </div>
+                    <br />
+                    <!--Add to cart button for each class. The function given to it has classes index specified to specify the class to execute the function on-->
+                    <button
+                      class="Addtocart"
+                      :id="lessons[index + i -1].name"
+                      @click="addToCart(lessons[index + i - 1])"
+                      :disabled="lessons[index + i -1].space == 0"
+                    >
+                      <i class="fa-solid fa-cart-plus"></i> Add To Cart
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <br />
+        </div>
+      </div>
+      <!--The elements in this div will be displayed only if the conditions in the v-if are met-->
+      <div v-if="!showProductPage && showCartPage && !showCheckoutPage">
+        <!--Cart section-->
+        <div id="Cartpage">
+          <br />
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <!--Go back to the product page-->
+          <i
+            @click="showTheCartPage"
+            id="Back"
+            class="fa-solid fa-arrow-left"
+          ></i>
+          <br />
+          <!--Includes all added items-->
+          <div class="Cartitems">
+            <br />
+            <center>
+              <h1>Your Cart</h1>
+            </center>
+            <!--If the cart array is not empty-->
+            <div v-if="cart.length > 0">
+              <!--Looping through the cart array to display cart items-->
+              <div v-for="(cartItem, index) in cart" class="CartItem">
+                <!--Delete button for the particular class-->
+                <button class="Delete" @click="deleteFromCart(index)">
+                  <i id="Trash" class="fa-solid fa-trash"></i>
+                </button>
+                <!--The div for each class stored in the cart-->
+                <div class="Classesincart">
+                  <br />
+                  <div class="Cartsubject">
+                    &nbsp;&nbsp;<b>{{ cartItem.name }}</b>
+                  </div>
+                  <div class="Qty">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<b>Qty:</b>
+                    <button
+                      id="Qtydown"
+                      :disabled="cartItem.cartqty === 1"
+                      @click="decQty(cartItem)"
+                    >
+                      -
+                    </button>
+                    {{ cartItem.cartqty }}
+                    <button
+                      id="Qtyup"
+                      :disabled="cartItem.cartqty === 5"
+                      @click="incQty(cartItem)"
+                    >
+                      +
+                    </button>
+                  </div>
+                  <div class="Cartprice">
+                    &nbsp;&nbsp;&nbsp;&nbsp;<b>Price:</b> £
+                    {{ cartItem.price * cartItem.cartqty }}
+                    <!--Finds the total price of a class by multiplying the fee per class and quantity in the cart-->
+                  </div>
+                  <br />
+                </div>
+                <br />
+              </div>
+            </div>
+            <!--If the cart is empty, meaning everything is deleted from the cart-->
+            <div v-else>
+              <br /><br />
+              <center>
+                <p style="font-size: 25px;">
+                  Uh oh! Looks like your cart is empty
+                </p>
+                <p style="font-size: 20px;">
+                  Add items to the cart to display them here
+                </p>
+              </center>
+            </div>
+          </div>
+        </div>
+        <div class="Total">
+          <br />
+          &nbsp;&nbsp;
+          <b>To be paid&nbsp;:</b>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <!--Total amount to be paid for all items in the cart, calculated from a function in computed-->
+          £ {{ totalAmt }} <br /><br /><br /><br />
+          <center>
+            <!--Directs the user to the checkout page, disabled if the cart is empty-->
+            <button
+              id="Checkoutbutton"
+              @click="showTheCheckoutPage"
+              :disabled="cart.length === 0"
+            >
+              <i class="fa-solid fa-cash-register"></i>&nbsp;&nbsp;Checkout
+            </button>
+          </center>
+        </div>
+      </div>
+      <!--The elements in this div will be displayed only if the conditions in the v-if are met-->
+      <div v-if="!showProductPage && !showCartPage && showCheckoutPage">
+        <div id="Checkoutpage">
+          &nbsp;&nbsp;&nbsp;
+          <!--Back to the cart page-->
+          <i
+            @click="showTheCheckoutPage"
+            id="Back"
+            class="fa-solid fa-arrow-left"
+          ></i>
+          <br />
+          <center>
+            <!--Box for a form where user details are asked-->
+            <div class="Theform">
+              <br />
+              <h1>Enter Your Details</h1>
+              <br />
+              <form>
+                <!--Here, v-model.trim is used to remove unnecessary space from the front and back, and v-model.number ensures that input is numeric in nature-->
+                <input
+                  id="FName"
+                  type="text"
+                  placeholder="First Name (Student)*"
+                  v-model.trim="submission.fname"
+                  required
+                />
+                <input
+                  id="MName"
+                  type="text"
+                  placeholder="Middle Name (Student)"
+                  v-model.trim="submission.mname"
+                />
+                <input
+                  id="LName"
+                  type="text"
+                  placeholder="Last Name (Student)*"
+                  v-model.trim="submission.lname"
+                  required
+                />
+                <br /><br />
+                <input
+                  id="StudentID"
+                  type="text"
+                  placeholder="Student ID (SHSXXXXXX)*"
+                  v-model.trim="submission.studentid"
+                  required
+                />
+                <br /><br />
+                <input
+                  id="Phone"
+                  type="number"
+                  placeholder="Phone*"
+                  pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                  v-model.number="submission.phone"
+                  required
+                />
+                <br /><br />
+                <input
+                  id="Email"
+                  type="email"
+                  placeholder="Student Email Address*"
+                  v-model.trim="submission.email"
+                  required
+                />
+                <br /><br />
+                <input
+                  id="Cardnumber"
+                  type="number"
+                  placeholder="Credit/Debit Card Number*"
+                  v-model.number="submission.cardno"
+                  required
+                />
+                <input
+                  id="CardCVV"
+                  type="number"
+                  placeholder="CVV*"
+                  v-model.number="submission.cvv"
+                  required
+                />
+                <br /><br />
+                Card Expiration Date:
+                <input
+                  id="Cardexpiry"
+                  type="date"
+                  placeholder="Expiration Date*"
+                  v-model="submission.cardexp"
+                  required
+                />
+                <br /><br /><br />
+              </form>
+              <!--Submit button which is disabled if required areas are left empty-->
+              <button
+                id="Submitform"
+                @click="submitTheForm"
+                :disabled="submission.fname === '' || submission.lname === '' || submission.studentid === '' || submission.phone === '' || submission.email === '' || submission.cardno === '' || submission.cardexp === '' || submission.cvv === ''"
+              >
+                Submit
+              </button>
+            </div>
+          </center>
+        </div>
+      </div>
+    </div>
+    <!--Data that will be loaded on the Vue app-->
+    <!--Data that will be loaded on the Vue app-->
+    <script type="text/javascript">
+      // Introducing the VueJS App
+      // Introducing the VueJS App
+      const AfterSchool = new Vue({
+        // Addressing the DOM element where Vue mounts the application
+        el: "#App",
+        // Vue JS Object Data
+        data: {
+          sitename: "Strawgoh | After School Classes Portal",
+          // calling the classes array from lessons.js.
+          // This is a shorthand way of saying "classes: classes"
+          // classes,
+          lessons: [], // Initialize lessons as an empty array
+          cart: [],
+          orders: [],
+          submission: {
+            id: Math.random(),
+            fname: "",
+            mname: "",
+            lname: "",
+            studentid: "",
+            phone: "",
+            email: "",
+            cardno: "",
+            cardexp: "",
+            cvv: ""
+          },
+          searchTerm: "",
+          showProductPage: true,
+          showCartPage: false,
+          showCheckoutPage: false
+        },
+        watch: {
+          searchTerm: function(newSearchTerm, oldSearchTerm) {
+            this.searchClasses();
+          }
+        },
+        methods: {
+          getLessons() {
+            fetch("http://localhost:3000/collection/Lessons")
+              .then(response => response.json())
+              .then(data => {
+                this.lessons = data;
+              })
+              .catch(error =>
+                console.error("There seems to be an error: ", error)
+              );
+          },
+          addToCart(classItem) {
+            if (classItem.cartqty == 0) {
+              this.cart.push(classItem);
+              alert("Added to Cart");
+              classItem.space--;
+              classItem.cartqty++;
+            } else {
+              classItem.cartqty++;
+              classItem.space--;
+            }
+          },
+          deleteFromCart(index) {
+            const deleted = this.cart[index];
+            const classItem = this.lessons.find(
+              item => item.name === deleted.name
+            );
+            if (classItem) {
+              classItem.space = 5;
+              classItem.cartqty = 0;
+            }
+            this.cart.splice(index, 1);
+          },
+          nameAsc() {
+            this.lessons.sort((a, b) => a.name.localeCompare(b.name));
+          },
+          nameDesc() {
+            this.lessons.sort((a, b) => b.name.localeCompare(a.name));
+          },
+          locationAsc() {
+            this.lessons.sort((a, b) => a.location.localeCompare(b.location));
+          },
+          locationDesc() {
+            this.lessons.sort((a, b) => b.location.localeCompare(a.location));
+          },
+          priceAsc() {
+            this.lessons.sort((a, b) => a.price - b.price);
+          },
+          priceDesc() {
+            this.lessons.sort((a, b) => b.price - a.price);
+          },
+          teacherAsc() {
+            this.lessons.sort((a, b) => a.teacher.localeCompare(b.teacher));
+          },
+          teacherDesc() {
+            this.lessons.sort((a, b) => b.teacher.localeCompare(a.teacher));
+          },
+          spaceAsc() {
+            this.lessons.sort((a, b) => a.space - b.space);
+          },
+          spaceDesc() {
+            this.lessons.sort((a, b) => b.space - a.space);
+          },
+          fetchClasses() {
+            if (this.lessons.length === 0) {
+              fetch("http://localhost:3000/collection/Lessons")
+                .then(response => response.json())
+                .then(data => {
+                  this.lessons = data;
+                })
+                .catch(error =>
+                  console.error("There seems to be an error: ", error)
+                );
+            }
+          },
+          searchClasses() {
+            const searchTerm = this.searchTerm.toLowerCase();
+            if (!searchTerm) {
+              this.fetchClasses();
+            } else {
+              this.lessons = this.lessons.filter(classItem => {
+                return (
+                  classItem.name.toLowerCase().includes(searchTerm) ||
+                  classItem.code.toLowerCase().includes(searchTerm) ||
+                  classItem.location.toLowerCase().includes(searchTerm) ||
+                  classItem.teacher.toLowerCase().includes(searchTerm)
+                );
+              });
+            }
+          },
+          showTheCartPage() {
+            this.showProductPage = !this.showProductPage;
+            this.showCartPage = !this.showCartPage;
+          },
+          showTheCheckoutPage() {
+            this.showCheckoutPage = !this.showCheckoutPage;
+            this.showCartPage = !this.showCartPage;
+          },
+          submitTheForm() {
+            alert("Submitted");
+            this.orders.push(this.submission);
+          },
+          incQty(cartItem) {
+            if (cartItem.cartqty < 5) {
+              cartItem.cartqty++;
+              cartItem.space--;
+            }
+          },
+          decQty(cartItem) {
+            if (cartItem.cartqty > 1) {
+              cartItem.cartqty--;
+              cartItem.space++;
+            }
+          }
+        },
+        created() {
+          this.fetchClasses();
+          this.getLessons();
+        },
+        computed: {
+          cartItemCount() {
+            return this.cart.length;
+          },
+          totalAmt() {
+            return this.cart.reduce(
+              (total, cartItem) => total + cartItem.price * cartItem.cartqty,
+              0
+            );
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
