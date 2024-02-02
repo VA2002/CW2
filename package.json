@@ -1,7 +1,8 @@
 {
-  "name": "mongo-demo",
+  "name": "CW2",
   "scripts": {
-    "start": "node rest.js"
+    "start": "node server.js",
+     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "express": "^4.18.2",
