@@ -37,7 +37,7 @@ MongoClient.connect(
 
 // Routes
 app.get("/", (req, res) => {
-  res.send("Select a collection e.g. /collection/messages");
+  res.send("Hello! Select a MongoDB collection, ex: /collection/Lessons or /collection/Orders");
 });
 
 app.param("collectionName", (req, res, next, collectionName) => {
