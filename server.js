@@ -27,7 +27,7 @@ MongoClient.connect(
   { useNewUrlParser: true, useUnifiedTopology: true },
   (err, client) => {
     if (err) {
-      console.error("Error connecting to MongoDB:", err);
+      console.error("ERROR ", err);
     } else {
       db = client.db("CW2");
       console.log("Connected to MongoDB");
@@ -93,5 +93,5 @@ const port = process.env.PORT || portNum
 
 // Start the server on port 8000
 app.listen(port, () => {
-  console.log("Runninh on Port " + portNum);
+  console.log("Running on Port " + portNum);
 });
