@@ -453,7 +453,7 @@
           },
           fetchClasses() {
             if (this.lessons.length === 0) {
-              fetch("http://localhost:3000/collection/Lessons")
+              fetch("http://localhost:8000/collection/Lessons")
                 .then(response => response.json())
                 .then(data => {
                   this.lessons = data;
