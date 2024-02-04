@@ -92,7 +92,14 @@ app.delete("/collection/:collectionName/:id", (req, res, next) => {
 app.post("/order", (req, res, next) => {
   const orderDetails = {
     fname: req.body.fname,
+    mname: req.body.mname,
     lname: req.body.lname, // Add this line to include last name
+    studentid: req.body.studentid,
+    phone: req.body.phone,
+    email: req.body.email,
+    cardno: req.body.cardno,
+    cvv: req.body.cvv,
+    cardexp: req.body.cardexp,
     cartitems: req.body.cartitems,
     payment: req.body.payment,
     // Add any other order details you want to include
