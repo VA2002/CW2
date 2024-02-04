@@ -88,8 +88,22 @@ app.delete("/collection/:collectionName/:id", (req, res, next) => {
   );
 });
 
+// NEW POST REQUEST FOR ORDER DETAILS
+app.post("/order", (req, res, next) => {
+  const orderDetails = {
+    ...req.body.submission, // Include all properties from submission
+    cartitems: req.body.cartitems,
+    payment: req.body.payment,
+    // Add any other order details you want to include
+  };
 
-const port = process.env.PORT || portNum
+  db.collection("Orders").insert(orderDetails, (e, results) => {
+    if (e) return next(e);
+    res.status(200).json({ message: 'Order submitted successfully!' });
+  });
+});
+
+const port = process.env.PORT || portNum;
 
 // Start the server on port 8000
 app.listen(port, () => {
