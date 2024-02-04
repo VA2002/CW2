@@ -67,9 +67,14 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
 });
 
 app.put("/collection/:collectionName/:id", (req, res, next) => {
+  const id = req.params.id;
+  // Assuming req.body.space contains the updated space value
+  const newSpace = req.body.space;
+
+  // Update the lesson's space in the database
   req.collection.update(
-    { _id: new ObjectID(req.params.id) },
-    { $set: req.body },
+    { _id: new ObjectID(id) },
+    { $set: { space: newSpace } },
     { safe: true, multi: false },
     (e, result) => {
       if (e) return next(e);

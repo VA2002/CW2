@@ -341,7 +341,7 @@
               <button
                 id="Submitform"
                 @click="handleSubmit"
-                :disabled= "fname === '' || lname === '' || studentid === '' || phone === '' || email === '' || cardno === '' || cardexp === '' || cvv === ''"
+                :disabled="fname === '' || lname === '' || studentid === '' || phone === '' || email === '' || cardno === '' || cardexp === '' || cvv === ''"
               >
                 Submit
               </button>
@@ -511,23 +511,13 @@
             this.payment = this.totalAmt;
           },
           handleSubmit() {
-            console.log("First Name:", this.fname);
-            console.log("Last Name:", this.lname);
-
             // Include cart items and payment in the submission data
             this.submission.cartitems = this.cart;
             this.submission.payment = this.payment;
             this.submission.fname = this.fname;
-            this.submission.mname = this.mname;
             this.submission.lname = this.lname;
-            this.submission.studentid = this.studentid;
-            this.submission.phone = this.phone;
-            this.submission.email = this.email;
-            this.submission.cardno = this.cardno;
-            this.submission.cvv = this.cvv;
-            this.submission.cardexp = this.cardexp;
 
-            // Sending a POST request to the server
+            // Sending a POST request to submit the order
             fetch(
               "http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/order",
               {
@@ -540,14 +530,50 @@
             )
               .then(response => response.json())
               .then(data => {
-                this.submitTheForm();
                 console.log("Order submitted successfully: ", data);
+
                 // Add any further actions you want to perform after successful submission
+
+                // Update lesson space after order submission
+                this.updateLessonSpace();
+
+                // Reset the form or perform any other necessary actions
+                this.resetForm();
               })
               .catch(error => {
                 console.error("Error submitting order: ", error);
                 // Handle the error appropriately
               });
+          },
+          updateLessonSpace() {
+            // Assuming you have an array of lesson IDs in this.cart
+            this.cart.forEach(cartItem => {
+              const id = cartItem._id;
+              const newSpace = cartItem.space - cartItem.cartqty;
+
+              // Sending a PUT request to update lesson space
+              fetch(
+                `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/lesson/${lessonId}`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({ space: updatedSpace })
+                }
+              )
+                .then(response => response.json())
+                .then(data => {
+                  console.log("Lesson space updated successfully: ", data);
+                })
+                .catch(error => {
+                  console.error("Error updating lesson space: ", error);
+                  // Handle the error appropriately
+                });
+            });
+          },
+          resetForm() {
+            console.log("Testing resetForm()")
           }
         },
         created() {
