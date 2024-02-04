@@ -269,28 +269,29 @@
                   id="FName"
                   type="text"
                   placeholder="First Name (Student)*"
-                  v-model.trim="submission.fname"
+                  v-model.trim="fname"
                   required
                 />
                 <input
                   id="MName"
                   type="text"
                   placeholder="Middle Name (Student)"
-                  v-model.trim="submission.mname"
+                  v-model.trim="mname"
                 />
                 <input
                   id="LName"
                   type="text"
                   placeholder="Last Name (Student)*"
-                  v-model.trim="submission.lname"
+                  v-model.trim="lname"
                   required
                 />
+
                 <br /><br />
                 <input
                   id="StudentID"
                   type="text"
                   placeholder="Student ID (SHSXXXXXX)*"
-                  v-model.trim="submission.studentid"
+                  v-model.trim="studentid"
                   required
                 />
                 <br /><br />
@@ -299,7 +300,7 @@
                   type="number"
                   placeholder="Phone*"
                   pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-                  v-model.number="submission.phone"
+                  v-model.number="phone"
                   required
                 />
                 <br /><br />
@@ -307,7 +308,7 @@
                   id="Email"
                   type="email"
                   placeholder="Student Email Address*"
-                  v-model.trim="submission.email"
+                  v-model.trim="email"
                   required
                 />
                 <br /><br />
@@ -315,14 +316,14 @@
                   id="Cardnumber"
                   type="number"
                   placeholder="Credit/Debit Card Number*"
-                  v-model.number="submission.cardno"
+                  v-model.number="cardno"
                   required
                 />
                 <input
                   id="CardCVV"
                   type="number"
                   placeholder="CVV*"
-                  v-model.number="submission.cvv"
+                  v-model.number="cvv"
                   required
                 />
                 <br /><br />
@@ -331,7 +332,7 @@
                   id="Cardexpiry"
                   type="date"
                   placeholder="Expiration Date*"
-                  v-model="submission.cardexp"
+                  v-model="cardexp"
                   required
                 />
                 <br /><br /><br />
@@ -339,8 +340,8 @@
               <!--Submit button which is disabled if required areas are left empty-->
               <button
                 id="Submitform"
-                @click="submitTheForm"
-                :disabled="submission.fname === '' || submission.lname === '' || submission.studentid === '' || submission.phone === '' || submission.email === '' || submission.cardno === '' || submission.cardexp === '' || submission.cvv === ''"
+                @click="handleSubmit"
+                :disabled= "fname === '' || lname === '' || studentid === '' || phone === '' || email === '' || cardno === '' || cardexp === '' || cvv === ''"
               >
                 Submit
               </button>
@@ -353,21 +354,14 @@
     <!--Data that will be loaded on the Vue app-->
     <script type="text/javascript">
       // Introducing the VueJS App
-      // Introducing the VueJS App
       const AfterSchool = new Vue({
-        // Addressing the DOM element where Vue mounts the application
         el: "#App",
-        // Vue JS Object Data
         data: {
           sitename: "Strawgoh | After School Classes Portal",
-          // calling the classes array from lessons.js.
-          // This is a shorthand way of saying "classes: classes"
-          // classes,
-          lessons: [], // Initialize lessons as an empty array
+          lessons: [],
           cart: [],
           orders: [],
           submission: {
-            id: Math.random(),
             fname: "",
             mname: "",
             lname: "",
@@ -376,8 +370,20 @@
             email: "",
             cardno: "",
             cardexp: "",
-            cvv: ""
+            cvv: "",
+            cartitems: [],
+            payment: 0
           },
+          payment: 0,
+          fname: "",
+          mname: "",
+          lname: "",
+          studentid: "",
+          phone: "",
+          email: "",
+          cardno: "",
+          cardexp: "",
+          cvv: "",
           searchTerm: "",
           showProductPage: true,
           showCartPage: false,
@@ -389,18 +395,8 @@
           }
         },
         methods: {
-          getLessons() {
-            fetch("http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/Lessons")
-              .then(response => response.json())
-              .then(data => {
-                this.lessons = data;
-              })
-              .catch(error =>
-                console.error("There seems to be an error: ", error)
-              );
-          },
           addToCart(classItem) {
-            if (classItem.cartqty == 0) {
+            if (classItem.cartqty === 0) {
               this.cart.push(classItem);
               alert("Added to Cart");
               classItem.space--;
@@ -409,6 +405,9 @@
               classItem.cartqty++;
               classItem.space--;
             }
+
+            // Update payment to reflect the total amount
+            this.payment = this.totalAmt;
           },
           deleteFromCart(index) {
             const deleted = this.cart[index];
@@ -420,6 +419,9 @@
               classItem.cartqty = 0;
             }
             this.cart.splice(index, 1);
+
+            // Update payment to reflect the total amount
+            this.payment = this.totalAmt;
           },
           nameAsc() {
             this.lessons.sort((a, b) => a.name.localeCompare(b.name));
@@ -453,7 +455,9 @@
           },
           fetchClasses() {
             if (this.lessons.length === 0) {
-              fetch("http://localhost:8000/collection/Lessons")
+              fetch(
+                "http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/Lessons"
+              )
                 .then(response => response.json())
                 .then(data => {
                   this.lessons = data;
@@ -495,17 +499,59 @@
               cartItem.cartqty++;
               cartItem.space--;
             }
+            // Update payment to reflect the total amount
+            this.payment = this.totalAmt;
           },
           decQty(cartItem) {
             if (cartItem.cartqty > 1) {
               cartItem.cartqty--;
               cartItem.space++;
             }
+            // Update payment to reflect the total amount
+            this.payment = this.totalAmt;
+          },
+          handleSubmit() {
+            console.log("First Name:", this.fname);
+            console.log("Last Name:", this.lname);
+
+            // Include cart items and payment in the submission data
+            this.submission.cartitems = this.cart;
+            this.submission.payment = this.payment;
+            this.submission.fname = this.fname;
+            this.submission.mname = this.mname;
+            this.submission.lname = this.lname;
+            this.submission.studentid = this.studentid;
+            this.submission.phone = this.phone;
+            this.submission.email = this.email;
+            this.submission.cardno = this.cardno;
+            this.submission.cvv = this.cvv;
+            this.submission.cardexp = this.cardexp;
+
+            // Sending a POST request to the server
+            fetch(
+              "http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/order",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify(this.submission)
+              }
+            )
+              .then(response => response.json())
+              .then(data => {
+                this.submitTheForm();
+                console.log("Order submitted successfully: ", data);
+                // Add any further actions you want to perform after successful submission
+              })
+              .catch(error => {
+                console.error("Error submitting order: ", error);
+                // Handle the error appropriately
+              });
           }
         },
         created() {
           this.fetchClasses();
-          this.getLessons();
         },
         computed: {
           cartItemCount() {
