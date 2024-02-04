@@ -91,7 +91,8 @@ app.delete("/collection/:collectionName/:id", (req, res, next) => {
 // NEW POST REQUEST FOR ORDER DETAILS
 app.post("/order", (req, res, next) => {
   const orderDetails = {
-    fname: req.body.fname, // Include all properties from submission
+    fname: req.body.fname,
+    lname: req.body.lname, // Add this line to include last name
     cartitems: req.body.cartitems,
     payment: req.body.payment,
     // Add any other order details you want to include
