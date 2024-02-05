@@ -66,22 +66,22 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
   });
 });
 
-// app.put("/collection/:collectionName/:id", (req, res, next) => {
-//   const id = req.params.id;
-//   // Assuming req.body.space contains the updated space value
-//   const newSpace = req.body.space;
+app.put("/collection/:collectionName/:id", (req, res, next) => {
+  const id = req.params.lessonId;
+  // Assuming req.body.space contains the updated space value
+  const newSpace = req.body.space;
 
-//   // Update the lesson's space in the database
-//   req.collection.update(
-//     { _id: new ObjectID(id) },
-//     { $set: { space: newSpace } },
-//     { safe: true, multi: false },
-//     (e, result) => {
-//       if (e) return next(e);
-//       res.send(result.result.n === 1 ? { msg: "success" } : { msg: "error" });
-//     }
-//   );
-// });
+  // Update the lesson's space in the database
+  req.collection.update(
+    { _id: new ObjectID(id) },
+    { $set: { space: newSpace } },
+    { safe: true, multi: false },
+    (e, result) => {
+      if (e) return next(e);
+      res.send(result.result.n === 1 ? { msg: "success" } : { msg: "error" });
+    }
+  );
+});
 
 app.delete("/collection/:collectionName/:id", (req, res, next) => {
   req.collection.deleteOne(
