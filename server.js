@@ -37,7 +37,9 @@ MongoClient.connect(
 
 // Routes
 app.get("/", (req, res) => {
-  res.send("Hello! Select a MongoDB collection, ex: /collection/Lessons or /collection/Orders");
+  res.send(
+    "Hello! Select a MongoDB collection, ex: /collection/Lessons or /collection/Orders"
+  );
 });
 
 app.param("collectionName", (req, res, next, collectionName) => {
@@ -104,14 +106,46 @@ app.post("/order", (req, res, next) => {
     cvv: req.body.cvv,
     cardexp: req.body.cardexp,
     cartitems: req.body.cartitems,
-    payment: req.body.payment,
+    payment: req.body.payment
     // Add any other order details you want to include
   };
 
   db.collection("Orders").insert(orderDetails, (e, results) => {
     if (e) return next(e);
-    res.status(200).json({ message: 'Order submitted successfully!' });
+    res.status(200).json({ message: "Order submitted successfully!" });
   });
+});
+
+// ... Your existing server.js code ...
+
+// ... Your existing server.js code ...
+
+// New endpoint for full-text search
+app.get("/search/:collectionName/:query", (req, res, next) => {
+  const collectionName = req.params.collectionName;
+  const query = req.params.query;
+
+  // Check if the specified collection exists in the database
+  if (!db.collectionNames().includes(collectionName)) {
+    return res.status(404).json({ error: "Collection not found" });
+  }
+
+  // Create a text index on the fields you want to search
+  db.collection(collectionName).createIndex(
+    { "$**": "text" },
+    { name: "TextIndex" },
+    (err, indexName) => {
+      if (err) return next(err);
+
+      // Perform the full-text search
+      db.collection(collectionName)
+        .find({ $text: { $search: query } })
+        .toArray((e, results) => {
+          if (e) return next(e);
+          res.send(results);
+        });
+    }
+  );
 });
 
 const port = process.env.PORT || portNum;
