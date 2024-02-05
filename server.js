@@ -120,33 +120,29 @@ app.post("/order", (req, res, next) => {
 
 // ... Your existing server.js code ...
 
-// New endpoint for full-text search
-app.get("/search/:collectionName/:query", (req, res, next) => {
-  const collectionName = req.params.collectionName;
-  const query = req.params.query;
+app.get("/collection/:collectionName/search/:query", (req, res, next) => {
+  const searchTerm = req.params.query;
+  const regex = new RegExp(searchTerm, "i"); // Case-insensitive search
 
-  // Check if the specified collection exists in the database
-  if (!db.collectionNames().includes(collectionName)) {
-    return res.status(404).json({ error: "Collection not found" });
-  }
-
-  // Create a text index on the fields you want to search
-  db.collection(collectionName).createIndex(
-    { "$**": "text" },
-    { name: "TextIndex" },
-    (err, indexName) => {
-      if (err) return next(err);
-
-      // Perform the full-text search
-      db.collection(collectionName)
-        .find({ $text: { $search: query } })
-        .toArray((e, results) => {
-          if (e) return next(e);
-          res.send(results);
-        });
-    }
-  );
+  req.collection
+    .find({
+      $or: [
+        { name: { $regex: regex } },
+        { code: { $regex: regex } },
+        { location: { $regex: regex } },
+        { teacher: { $regex: regex } },
+      ],
+    })
+    .toArray((e, results) => {
+      if (e) return next(e);
+      res.send(results);
+    });
 });
+
+
+// ... Your existing server.js code ...
+
+// ... Your existing server.js code ...
 
 const port = process.env.PORT || portNum;
 
