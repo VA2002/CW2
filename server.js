@@ -120,24 +120,21 @@ app.post("/order", (req, res, next) => {
 
 // ... Your existing server.js code ...
 
-app.get("/collection/:collectionName/search/:query", (req, res, next) => {
-  const searchTerm = req.params.query;
-  const regex = new RegExp(searchTerm, "i"); // Case-insensitive search
+// Add a new route for search
+app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
+  const collection = req.collection;
+  const searchTerm = req.params.searchTerm;
 
-  req.collection
-    .find({
-      $or: [
-        { name: { $regex: regex } },
-        { code: { $regex: regex } },
-        { location: { $regex: regex } },
-        { teacher: { $regex: regex } },
-      ],
-    })
-    .toArray((e, results) => {
-      if (e) return next(e);
+  // Perform a full-text search using a case-insensitive regex
+  collection
+    .find({ $text: { $search: searchTerm, $caseSensitive: false } })
+    .toArray((err, results) => {
+      if (err) return next(err);
       res.send(results);
     });
 });
+
+
 
 
 // ... Your existing server.js code ...
