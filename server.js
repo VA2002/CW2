@@ -73,35 +73,24 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
   });
 });
 
-// Existing route to handle PUT requests for updating lessons
-app.put("/collection/Lessons/:id", (req, res) => {
+// Update the lesson space in the database based on the order
+app.put('/collection/Lessons/:id', (req, res, next) => {
   const lessonId = req.params.id;
-  const updatedSpace = req.body.space;
+  const newSpace = req.body.space;
 
-  // Validate input (you can add more validation as needed)
-  if (!lessonId || typeof updatedSpace !== "number") {
-    return res.status(400).json({ error: "Invalid input parameters" });
-  }
-
-  // Update the lesson's space in the database using req.collection
-  req.collection.update(
-    { _id: ObjectID(lessonId) },
-    { $set: { space: updatedSpace } },
+  req.collection.updateOne(
+    { _id: new ObjectID(lessonId) },
+    { $set: { space: newSpace } },
     (err, result) => {
       if (err) {
-        console.error("Error updating lesson space:", err);
-        return res.status(500).json({ error: "Internal server error" });
+        return next(err);
       }
 
-      // Check if the update was successful
-      if (result.modifiedCount === 0) {
-        return res.status(404).json({ error: "Lesson not found" });
-      }
-
-      res.status(200).json({ message: "Lesson space updated successfully" });
+      res.send(result.modifiedCount === 1 ? { msg: 'success' } : { msg: 'error' });
     }
   );
 });
+
 
 app.delete("/collection/:collectionName/:id", (req, res, next) => {
   req.collection.deleteOne(
