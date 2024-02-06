@@ -1,7 +1,13 @@
-const express = require("express");
+const express = require('express');
+const bodyParser = require('body-parser');
+const { MongoClient } = require('mongodb');
 const app = express();
-const MongoClient = require("mongodb").MongoClient;
-const ObjectID = require("mongodb").ObjectID;
+const port = process.env.PORT || 3000;
+
+app.use(bodyParser.json());
+
+// Serve static files from the 'public' directory
+app.use(express.static('public'));
 
 app.use(express.json());
 const portNum = 3000;
