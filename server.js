@@ -73,7 +73,6 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
   });
 });
 
-// Update the lesson space in the database based on the order
 app.put('/collection/Lessons/:id', (req, res, next) => {
   const lessonId = req.params.id;
   const newSpace = req.body.space;
@@ -86,10 +85,14 @@ app.put('/collection/Lessons/:id', (req, res, next) => {
         return next(err);
       }
 
-      res.send(result.modifiedCount === 1 ? { msg: 'success' } : { msg: 'error' });
+      const response = result.modifiedCount === 1 ? { msg: 'success' } : { msg: 'error' };
+
+      // Send a JSON response
+      res.json(response);
     }
   );
 });
+
 
 
 app.delete("/collection/:collectionName/:id", (req, res, next) => {
