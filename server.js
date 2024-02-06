@@ -7,10 +7,6 @@ app.use(express.json());
 const portNum = 3000;
 app.set("port", portNum);
 
-app.use((req, res, next) => {
-  console.log(`${new Date().toLocaleString()} - ${req.method} ${req.url}`);
-  next();
-});
 
 // CORS Configuration
 app.use((req, res, next) => {
@@ -39,6 +35,12 @@ MongoClient.connect(
     }
   }
 );
+
+app.use((req, res, next) => {
+  console.log(`${new Date().toLocaleString()} - ${req.method} ${req.url}`);
+  next();
+});
+
 
 // Routes
 app.get("/", (req, res) => {
