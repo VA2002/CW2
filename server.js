@@ -5,10 +5,10 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
-const app = express();
+//const app = express();
 
 // Serve static files from the 'public' directory
-app.use(express.static(path.join(__dirname, 'public')));
+//app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(express.json());
 const portNum = 3000;
