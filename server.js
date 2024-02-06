@@ -1,14 +1,7 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
+const express = require("express");
 const app = express();
-const port = process.env.PORT || 3000;
-
-app.use(bodyParser.json());
-//const app = express();
-
-// Serve static files from the 'public' directory
-//app.use(express.static(path.join(__dirname, 'public')));
+const MongoClient = require("mongodb").MongoClient;
+const ObjectID = require("mongodb").ObjectID;
 
 app.use(express.json());
 const portNum = 3000;
@@ -80,6 +73,7 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
   });
 });
 
+// Update the lesson space in the database based on the order
 app.put('/collection/Lessons/:id', (req, res, next) => {
   const lessonId = req.params.id;
   const newSpace = req.body.space;
@@ -92,14 +86,10 @@ app.put('/collection/Lessons/:id', (req, res, next) => {
         return next(err);
       }
 
-      const response = result.modifiedCount === 1 ? { msg: 'success' } : { msg: 'error' };
-
-      // Send a JSON response
-      res.json(response);
+      res.send(result.modifiedCount === 1 ? { msg: 'success' } : { msg: 'error' });
     }
   );
 });
-
 
 
 app.delete("/collection/:collectionName/:id", (req, res, next) => {
