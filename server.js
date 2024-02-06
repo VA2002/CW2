@@ -125,6 +125,8 @@ app.post("/order", (req, res, next) => {
     if (e) return next(e);
     res.status(200).json({ message: "Order submitted successfully!" });
   });
+
+  console.log("Order submited");
 });
 
 // ... Your existing server.js code ...
@@ -148,6 +150,12 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
       }
     });
 });
+
+
+
+// ... Your existing server.js code ...
+
+// ... Your existing server.js code ...
 
 const port = process.env.PORT || portNum;
 
