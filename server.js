@@ -7,6 +7,11 @@ app.use(express.json());
 const portNum = 3000;
 app.set("port", portNum);
 
+app.use((req, res, next) => {
+  console.log(`${new Date().toLocaleString()} - ${req.method} ${req.url}`);
+  next();
+});
+
 // CORS Configuration
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -150,12 +155,6 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
       }
     });
 });
-
-
-
-// ... Your existing server.js code ...
-
-// ... Your existing server.js code ...
 
 const port = process.env.PORT || portNum;
 
