@@ -126,41 +126,47 @@ app.post("/order", (req, res, next) => {
     payment: req.body.payment
   };
 
-  // Iterate through cartitems and update lesson spaces
-  req.body.cartitems.forEach(cartItem => {
-    const lessonId = cartItem.lessonId;
-    const quantity = cartItem.quantity;
+  // Iterate through cartitems and update lesson spaces in the Lessons collection
+  Promise.all(
+    req.body.cartitems.map(cartItem => {
+      const lessonId = cartItem.lessonId;
+      const quantity = cartItem.quantity;
 
-    // Update the lesson's space in the database
-    req.collection.updateOne(
-      { _id: new ObjectID(lessonId) },
-      { $inc: { space: -quantity } },
-      (err, result) => {
-        if (err) {
-          return next(err);
-        }
-      }
-    );
-  });
-
-  // Update lesson spaces based on the order
-  updateLessonSpace(req.body.cartitems)
+      // Update the lesson's space in the database
+      return new Promise((resolve, reject) => {
+        db.collection("Lessons").updateOne(
+          { _id: new ObjectID(lessonId) },
+          { $inc: { space: -quantity } },
+          (err, result) => {
+            if (err) {
+              console.error(`Failed to update space for lesson with ID ${lessonId}`);
+              reject(err);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+      });
+    })
+  )
     .then(() => {
       // Insert the order details into the Orders collection
       db.collection("Orders").insertOne(orderDetails, (e, results) => {
-        if (e) return next(e);
-        res.status(200).json({ message: "Order submitted successfully!" });
+        if (e) {
+          console.error("Error during order submission:", e);
+          res.status(500).json({ error: "Internal server error during order submission." });
+        } else {
+          res.status(200).json({ message: "Order submitted successfully!" });
+          console.log("Order submitted");
+        }
       });
-
-      console.log("Order submitted");
     })
     .catch(error => {
-      console.error("Error updating lesson spaces:", error);
-      res
-        .status(500)
-        .json({ error: "Internal server error during order submission." });
+      console.error("Error during order submission:", error);
+      res.status(500).json({ error: "Internal server error during order submission." });
     });
 });
+
 
 // Function to update lesson spaces based on cart items
 const updateLessonSpace = cartItems => {
