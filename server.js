@@ -111,44 +111,12 @@ app.delete("/collection/:collectionName/:id", (req, res, next) => {
   );
 });
 
-
-You're right, my apologies for the oversight. I should have used updateResult to ensure that the update operation was successful. Here's the corrected code:
-
-javascript
-Copy code
-// ... (Your existing imports and configuration)
-
-app.put("/collection/:collectionName/:id", (req, res, next) => {
-  const id = req.params.id;
-  const newSpace = req.body.space;
-
-  // Update the lesson's space in the database
-  req.collection.updateOne(
-    { _id: new ObjectID(id) },
-    { $set: { space: newSpace } },
-    (err, result) => {
-      if (err) {
-        return next(err);
-      }
-
-      // Return the updated lesson
-      req.collection.findOne({ _id: new ObjectID(id) }, (error, updatedLesson) => {
-        if (error) {
-          return next(error);
-        }
-
-        res.json(updatedLesson);
-      });
-    }
-  );
-});
-
 // NEW POST REQUEST FOR ORDER DETAILS
 app.post("/order", (req, res, next) => {
   const orderDetails = {
     fname: req.body.fname,
     mname: req.body.mname,
-    lname: req.body.lname,
+    lname: req.body.lname, // Add this line to include last name
     studentid: req.body.studentid,
     phone: req.body.phone,
     email: req.body.email,
@@ -162,41 +130,34 @@ app.post("/order", (req, res, next) => {
 
   db.collection("Orders").insert(orderDetails, (e, results) => {
     if (e) return next(e);
-
-    // Update lesson space based on cart items
-    req.body.cartitems.forEach((cartItem) => {
-      const lessonId = cartItem.lessonId;
-      const quantityOrdered = cartItem.quantity;
-
-      // Fetch lesson from the collection
-      req.collection.findOne({ _id: new ObjectID(lessonId) }, (error, lesson) => {
-        if (error) {
-          console.error("Error fetching lesson for update:", error);
-          // Handle the error as needed
-        } else {
-          // Calculate the new space for the lesson
-          const newSpace = lesson.space - quantityOrdered;
-
-          // Update the lesson's space in the database
-          req.collection.updateOne(
-            { _id: new ObjectID(lessonId) },
-            { $set: { space: newSpace } },
-            (updateErr, updateResult) => {
-              if (updateErr) {
-                console.error("Error updating lesson space:", updateErr);
-                // Handle the update error as needed
-              } else {
-                console.log("Lesson space updated successfully:", updateResult);
-              }
-            }
-          );
-        }
-      });
-    });
-
     res.status(200).json({ message: "Order submitted successfully!" });
   });
+
+  console.log("Order submited");
 });
+
+// ... Your existing server.js code ...
+
+// ... Your existing server.js code ...
+
+app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
+  const collection = req.collection;
+  const searchTerm = req.params.searchTerm;
+
+  // Perform a full-text search using a case-insensitive regex
+  collection
+    .find({ $text: { $search: searchTerm, $caseSensitive: false } })
+    .toArray((err, results) => {
+      if (err) {
+        console.error("Error performing search:", err);
+        // Send a meaningful error response
+        res.status(500).json({ error: "Internal server error during search." });
+      } else {
+        res.json(results);
+      }
+    });
+});
+
 
 
 // ... Your existing server.js code ...
