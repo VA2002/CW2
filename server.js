@@ -70,19 +70,29 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
 
 app.put("/collection/:collectionName/:id", (req, res, next) => {
   const id = req.params.id;
-  const updatedSpace = req.body.newSpace;
+  const newSpace = req.body.space;
 
   // Update the lesson's space in the database
-  req.collection.update(
+  req.collection.updateOne(
     { _id: new ObjectID(id) },
-    { $set: { space: updatedSpace } },
-    { safe: true, multi: false },
-    (e, result) => {
-      if (e) return next(e);
-      res.send(result.result.n === 1 ? { msg: "success" } : { msg: "ERROR!" });
+    { $set: { space: newSpace } },
+    (err, result) => {
+      if (err) {
+        return next(err);
+      }
+
+      // Return the updated lesson
+      req.collection.findOne({ _id: new ObjectID(id) }, (error, updatedLesson) => {
+        if (error) {
+          return next(error);
+        }
+
+        res.json(updatedLesson);
+      });
     }
   );
 });
+
 
 app.delete("/collection/:collectionName/:id", (req, res, next) => {
   req.collection.deleteOne(
