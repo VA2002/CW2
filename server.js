@@ -73,30 +73,32 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
   });
 });
 
-app.put("/collection/:collectionName/:id", (req, res, next) => {
-  const id = req.params.id;
-  const newSpace = req.body.space;
+// Existing route to handle PUT requests for updating lessons
+app.put("/collection/Lessons/:id", (req, res) => {
+  const lessonId = req.params.id;
+  const updatedSpace = req.body.space;
 
-  // Update the lesson's space in the database
-  req.collection.updateOne(
-    { _id: new ObjectID(id) },
-    { $set: { space: newSpace } },
+  // Validate input (you can add more validation as needed)
+  if (!lessonId || typeof updatedSpace !== "number") {
+    return res.status(400).json({ error: "Invalid input parameters" });
+  }
+
+  // Update the lesson's space in the database using req.collection
+  req.collection.update(
+    { _id: ObjectID(lessonId) },
+    { $set: { space: updatedSpace } },
     (err, result) => {
       if (err) {
-        return next(err);
+        console.error("Error updating lesson space:", err);
+        return res.status(500).json({ error: "Internal server error" });
       }
 
-      // Return the updated lesson
-      req.collection.findOne(
-        { _id: new ObjectID(id) },
-        (error, updatedLesson) => {
-          if (error) {
-            return next(error);
-          }
+      // Check if the update was successful
+      if (result.modifiedCount === 0) {
+        return res.status(404).json({ error: "Lesson not found" });
+      }
 
-          res.json(updatedLesson);
-        }
-      );
+      res.status(200).json({ message: "Lesson space updated successfully" });
     }
   );
 });
