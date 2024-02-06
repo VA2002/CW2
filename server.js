@@ -7,7 +7,6 @@ app.use(express.json());
 const portNum = 3000;
 app.set("port", portNum);
 
-
 // CORS Configuration
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -40,7 +39,6 @@ app.use((req, res, next) => {
   console.log(`${new Date().toLocaleString()} - ${req.method} ${req.url}`);
   next();
 });
-
 
 // Routes
 app.get("/", (req, res) => {
@@ -89,13 +87,16 @@ app.put("/collection/:collectionName/:id", (req, res, next) => {
       }
 
       // Return the updated lesson
-      req.collection.findOne({ _id: new ObjectID(id) }, (error, updatedLesson) => {
-        if (error) {
-          return next(error);
-        }
+      req.collection.findOne(
+        { _id: new ObjectID(id) },
+        (error, updatedLesson) => {
+          if (error) {
+            return next(error);
+          }
 
-        res.json(updatedLesson);
-      });
+          res.json(updatedLesson);
+        }
+      );
     }
   );
 });
@@ -123,46 +124,64 @@ app.post("/order", (req, res, next) => {
     cardexp: req.body.cardexp,
     cartitems: req.body.cartitems,
     payment: req.body.payment
-    // Add any other order details you want to include
   };
 
-  db.collection("Orders").insert(orderDetails, (e, results) => {
-    if (e) return next(e);
+  // Iterate through cartitems and update lesson spaces
+  req.body.cartitems.forEach(cartItem => {
+    const lessonId = cartItem.lessonId;
+    const quantity = cartItem.quantity;
 
-    // Update lesson space based on cart items
-    req.body.cartitems.forEach((cartItem) => {
-      const lessonId = cartItem.lessonId;
-      const quantityOrdered = cartItem.quantity;
-
-      // Fetch lesson from the collection
-      req.collection.findOne({ _id: new ObjectID(lessonId) }, (error, lesson) => {
-        if (error) {
-          console.error("Error fetching lesson for update:", error);
-          // Handle the error as needed
-        } else {
-          // Calculate the new space for the lesson
-          const newSpace = lesson.space - quantityOrdered;
-
-          // Update the lesson's space in the database
-          req.collection.updateOne(
-            { _id: new ObjectID(lessonId) },
-            { $set: { space: newSpace } },
-            (updateErr, updateResult) => {
-              if (updateErr) {
-                console.error("Error updating lesson space:", updateErr);
-                // Handle the update error as needed
-              } else {
-                console.log("Lesson space updated successfully:", updateResult);
-              }
-            }
-          );
+    // Update the lesson's space in the database
+    req.collection.updateOne(
+      { _id: new ObjectID(lessonId) },
+      { $inc: { space: -quantity } },
+      (err, result) => {
+        if (err) {
+          return next(err);
         }
-      });
-    });
-
-    res.status(200).json({ message: "Order submitted successfully!" });
+      }
+    );
   });
+
+  // Update lesson spaces based on the order
+  updateLessonSpace(req.body.cartitems)
+    .then(() => {
+      // Insert the order details into the Orders collection
+      db.collection("Orders").insertOne(orderDetails, (e, results) => {
+        if (e) return next(e);
+        res.status(200).json({ message: "Order submitted successfully!" });
+      });
+
+      console.log("Order submitted");
+    })
+    .catch(error => {
+      console.error("Error updating lesson spaces:", error);
+      res
+        .status(500)
+        .json({ error: "Internal server error during order submission." });
+    });
 });
+
+// Function to update lesson spaces based on cart items
+const updateLessonSpace = cartItems => {
+  const updatePromises = cartItems.map(cartItem => {
+    const lessonId = cartItem.lessonId;
+    const quantity = cartItem.quantity;
+
+    // Prepare the updated space object
+    const spaceUpdate = { $inc: { space: -quantity } };
+
+    // Sending a PUT request to update lesson space
+    return req.collection.updateOne(
+      { _id: new ObjectID(lessonId) },
+      spaceUpdate
+    );
+  });
+
+  // Wait for all updates to complete
+  return Promise.all(updatePromises);
+};
+
 // ... Your existing server.js code ...
 
 app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
@@ -182,8 +201,6 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
       }
     });
 });
-
-
 
 // ... Your existing server.js code ...
 
