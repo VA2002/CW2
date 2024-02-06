@@ -126,17 +126,23 @@ app.post("/order", (req, res, next) => {
     payment: req.body.payment
   };
 
-  // Iterate through cartitems and update lesson spaces in the Lessons collection
+  // Get the lesson IDs and corresponding updated spaces from the order details
+  const lessonUpdates = req.body.cartitems.map(cartItem => ({
+    _id: new ObjectID(cartItem.lessonId),
+    space: cartItem.space
+  }));
+
+  // Update lesson spaces in the Lessons collection
   Promise.all(
-    req.body.cartitems.map(cartItem => {
-      const lessonId = cartItem.lessonId;
-      const quantity = cartItem.quantity;
+    lessonUpdates.map(lessonUpdate => {
+      const lessonId = lessonUpdate._id;
+      const newSpace = lessonUpdate.space;
 
       // Update the lesson's space in the database
       return new Promise((resolve, reject) => {
         db.collection("Lessons").updateOne(
-          { _id: new ObjectID(lessonId) },
-          { $inc: { space: -quantity } },
+          { _id: lessonId },
+          { $set: { space: newSpace } },
           (err, result) => {
             if (err) {
               console.error(`Failed to update space for lesson with ID ${lessonId}`);
