@@ -100,7 +100,6 @@ app.put("/collection/:collectionName/:id", (req, res, next) => {
   );
 });
 
-
 app.delete("/collection/:collectionName/:id", (req, res, next) => {
   req.collection.deleteOne(
     { _id: new ObjectID(req.params.id) },
@@ -111,12 +110,11 @@ app.delete("/collection/:collectionName/:id", (req, res, next) => {
   );
 });
 
-// NEW POST REQUEST FOR ORDER DETAILS
 app.post("/order", (req, res, next) => {
   const orderDetails = {
     fname: req.body.fname,
     mname: req.body.mname,
-    lname: req.body.lname, // Add this line to include last name
+    lname: req.body.lname,
     studentid: req.body.studentid,
     phone: req.body.phone,
     email: req.body.email,
@@ -130,14 +128,41 @@ app.post("/order", (req, res, next) => {
 
   db.collection("Orders").insert(orderDetails, (e, results) => {
     if (e) return next(e);
+
+    // Update lesson space based on cart items
+    req.body.cartitems.forEach((cartItem) => {
+      const lessonId = cartItem.lessonId;
+      const quantityOrdered = cartItem.quantity;
+
+      // Fetch lesson from the collection
+      req.collection.findOne({ _id: new ObjectID(lessonId) }, (error, lesson) => {
+        if (error) {
+          console.error("Error fetching lesson for update:", error);
+          // Handle the error as needed
+        } else {
+          // Calculate the new space for the lesson
+          const newSpace = lesson.space - quantityOrdered;
+
+          // Update the lesson's space in the database
+          req.collection.updateOne(
+            { _id: new ObjectID(lessonId) },
+            { $set: { space: newSpace } },
+            (updateErr, updateResult) => {
+              if (updateErr) {
+                console.error("Error updating lesson space:", updateErr);
+                // Handle the update error as needed
+              } else {
+                console.log("Lesson space updated successfully:", updateResult);
+              }
+            }
+          );
+        }
+      });
+    });
+
     res.status(200).json({ message: "Order submitted successfully!" });
   });
-
-  console.log("Order submited");
 });
-
-// ... Your existing server.js code ...
-
 // ... Your existing server.js code ...
 
 app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
