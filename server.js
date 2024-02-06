@@ -83,6 +83,7 @@ app.put("/collection/:collectionName/:id", (req, res, next) => {
     }
   );
 });
+
 app.delete("/collection/:collectionName/:id", (req, res, next) => {
   req.collection.deleteOne(
     { _id: new ObjectID(req.params.id) },
@@ -137,12 +138,6 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
       }
     });
 });
-
-
-
-// ... Your existing server.js code ...
-
-// ... Your existing server.js code ...
 
 const port = process.env.PORT || portNum;
 
