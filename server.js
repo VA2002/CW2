@@ -120,7 +120,6 @@ app.post("/order", (req, res, next) => {
 
 // ... Your existing server.js code ...
 
-// Add a new route for search
 app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
   const collection = req.collection;
   const searchTerm = req.params.searchTerm;
@@ -129,10 +128,21 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
   collection
     .find({ $text: { $search: searchTerm, $caseSensitive: false } })
     .toArray((err, results) => {
-      if (err) return next(err);
-      res.send(results);
+      if (err) {
+        console.error("Error performing search:", err);
+        // Send a meaningful error response
+        res.status(500).json({ error: "Internal server error during search." });
+      } else {
+        res.json(results);
+      }
     });
 });
+
+
+
+// ... Your existing server.js code ...
+
+// ... Your existing server.js code ...
 
 const port = process.env.PORT || portNum;
 
