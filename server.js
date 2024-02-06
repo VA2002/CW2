@@ -134,13 +134,6 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
     });
 });
 
-
-
-
-// ... Your existing server.js code ...
-
-// ... Your existing server.js code ...
-
 const port = process.env.PORT || portNum;
 
 // Start the server on port 8000
