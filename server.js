@@ -1,5 +1,6 @@
 const express = require("express");
 const http = require("http");
+const path = require("path");
 const app = express();
 const MongoClient = require("mongodb").MongoClient;
 const ObjectID = require("mongodb").ObjectID;
@@ -19,6 +20,8 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+app.use(express.static(path.join(__dirname, "public")));
 
 let db;
 
