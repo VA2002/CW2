@@ -80,23 +80,18 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
   });
 });
 
-// Update the lesson space in the database based on the order
 app.put('/collection/Lessons/:id', (req, res, next) => {
-  const lessonId = req.params.id;
-  const newSpace = req.body.space;
-
-  req.collection.updateOne(
-    { _id: new ObjectID(lessonId) },
-    { $set: { space: newSpace } },
-    (err, result) => {
-      if (err) {
-        return next(err);
+  req.collection.update(
+      {_id: new ObjectID(req.params.id)},
+      {$set: req.body},
+      {safe: true, multi: false},
+      (e, result) => {
+          if (e) return next(e)
+          res.send(result.result.n === 1) ? {msg: 'success'}:{msg: 'error'}
       }
-
-      res.send(result.modifiedCount === 1 ? { msg: 'success' } : { msg: 'error' });
-    }
   );
 });
+
 
 
 app.delete("/collection/:collectionName/:id", (req, res, next) => {
@@ -172,25 +167,25 @@ app.post("/order", (req, res, next) => {
 });
 
 
-// Function to update lesson spaces based on cart items
-const updateLessonSpace = cartItems => {
-  const updatePromises = cartItems.map(cartItem => {
-    const lessonId = cartItem.lessonId;
-    const quantity = cartItem.quantity;
+// // Function to update lesson spaces based on cart items
+// const updateLessonSpace = cartItems => {
+//   const updatePromises = cartItems.map(cartItem => {
+//     const lessonId = cartItem.lessonId;
+//     const quantity = cartItem.quantity;
 
-    // Prepare the updated space object
-    const spaceUpdate = { $inc: { space: -quantity } };
+//     // Prepare the updated space object
+//     const spaceUpdate = { $inc: { space: -quantity } };
 
-    // Sending a PUT request to update lesson space
-    return req.collection.updateOne(
-      { _id: new ObjectID(lessonId) },
-      spaceUpdate
-    );
-  });
+//     // Sending a PUT request to update lesson space
+//     return req.collection.updateOne(
+//       { _id: new ObjectID(lessonId) },
+//       spaceUpdate
+//     );
+//   });
 
-  // Wait for all updates to complete
-  return Promise.all(updatePromises);
-};
+//   // Wait for all updates to complete
+//   return Promise.all(updatePromises);
+// };
 
 // ... Your existing server.js code ...
 
