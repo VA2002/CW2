@@ -218,7 +218,7 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
 
 const port = process.env.PORT || portNum;
 
-http.createServer(app).listen(port);
+//http.createServer(app).listen(port);
 
 // Start the server on port 8000
 app.listen(port, () => {
