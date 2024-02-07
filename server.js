@@ -80,14 +80,11 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
   });
 });
 
-app.put('/collection/Lessons/:id', (req, res, next) => {
-  const lessonId = req.params.id;
-  const newSpaceValue = req.body.space;  // Assuming space is included in the request body
-
+app.put('/collection/:collectionName/:id', (req, res, next) => {
   // Update the lesson with the new space value
   req.collection.update(
-      { _id: new ObjectID(lessonId) },
-      { $set: { space: newSpaceValue } },
+      { _id: new ObjectID(req.params.id) },
+      { $set: { space: req.body.space } },
       { safe: true, multi: false },
       (e, result) => {
           if (e) return next(e);
@@ -203,7 +200,7 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
     .find({ $text: { $search: searchTerm, $caseSensitive: false } })
     .toArray((err, results) => {
       if (err) {
-        console.error("Error performing search:", err);
+        console.error("ERROR:", err);
         // Send a meaningful error response
         res.status(500).json({ error: "Internal server error during search." });
       } else {

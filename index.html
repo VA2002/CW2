@@ -553,11 +553,12 @@
                 console.log("Order submitted successfully: ", data);
 
                 // Update lesson space after order submission
-                this.updateLessonSpace();
+                this.cart.forEach(item => {
+                  this.updateLessonSpace(item._id, item.cartqty);
+                });
 
                 // Clear the cart after a successful order
                 this.cart = [];
-
                 alert("Submitted");
                 this.orders.push(this.submission);
 
@@ -571,23 +572,43 @@
                 // Handle the error appropriately
               });
           },
-          updateLessonSpace(lessonId, newSpaceValue) {
+
+          updateLessonSpace(lessonId, cartQuantity) {
+            // Fetch the lesson details for the given lessonId
             fetch(
-              `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/Lessons/${lessonId}`,
-              {
-                method: "PUT",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ space: newSpaceValue })
-              }
+              `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/Lessons/${lessonId}`
             )
-              .then(response => response.json())
-              .then(data => {
-                console.log("Lesson space updated successfully:", data);
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+              })
+              .then(lesson => {
+                // Calculate the new space value based on the cart quantity
+                const newSpaceValue = lesson.space - cartQuantity;
+
+                // Update the lesson space using a PUT request
+                fetch(
+                  `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/Lessons/${lessonId}`,
+                  {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ space: newSpaceValue })
+                  }
+                )
+                  .then(response => response.json())
+                  .then(data => {
+                    console.log("Lesson space updated successfully:", data);
+                  })
+                  .catch(error => {
+                    console.error("Error updating lesson space:", error);
+                  });
               })
               .catch(error => {
-                console.error("Error updating lesson space:", error);
+                console.error("Error fetching lesson details:", error);
               });
           },
 
