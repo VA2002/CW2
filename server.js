@@ -81,16 +81,21 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
 });
 
 app.put('/collection/Lessons/:id', (req, res, next) => {
+  const lessonId = req.params.id;
+  const newSpaceValue = req.body.space;  // Assuming space is included in the request body
+
+  // Update the lesson with the new space value
   req.collection.update(
-      {_id: new ObjectID(req.params.id)},
-      {$set: req.body},
-      {safe: true, multi: false},
+      { _id: new ObjectID(lessonId) },
+      { $set: { space: newSpaceValue } },
+      { safe: true, multi: false },
       (e, result) => {
-          if (e) return next(e)
-          res.send(result.result.n === 1) ? {msg: 'success'}:{msg: 'error'}
+          if (e) return next(e);
+          res.send(result.result.n === 1) ? { msg: 'success' } : { msg: 'error' };
       }
   );
 });
+
 
 
 
