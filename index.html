@@ -613,37 +613,33 @@
           },
 
           performSearch() {
-            if (this.searchTerm.length > 0) {
-              // Use the collection name you want to search in
-              const collectionName = "Lessons";
+            // To ensure search is not case sensitive
+            const searchTerm = this.searchTerm.toLowerCase();
 
-              // Send a GET request to the server for full-text search
+            // In case there is no search term
+            if (!searchTerm) {
+              this.fetchClasses();
+            }
+            // If there is a search term, make a request to the backend to fetch results
+            else {
+              const collectionName = "Lessons"; // replace with your actual collection name
               fetch(
-                `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/${collectionName}/search/${this.searchTerm}`
+                `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/${collectionName}/search/${searchTerm}`
               )
                 .then(response => {
                   if (!response.ok) {
-                    console.log(`HTTP error! Status: ${response.status}`);
+                    throw new Error("Network response was not ok");
                   }
-                  return response.text();
+                  return response.json();
                 })
                 .then(data => {
-                  try {
-                    // Attempt to parse the response as JSON
-                    const parsedData = JSON.parse(data);
-                    console.log("Search results:", parsedData);
-                    // Update the lessons array with search results
-                    this.lessons = parsedData;
-                  } catch (error) {
-                    console.log("Error parsing JSON:", error);
-                  }
+                  // Update the classes array with the search results from the backend
+                  this.classes = data;
                 })
                 .catch(error => {
-                  console.log("Error performing search:", error);
+                  console.error("Error fetching search results:", error);
+                  // Handle error (e.g., show an error message to the user)
                 });
-            } else {
-              // If search term is empty, fetch all classes
-              this.fetchClasses();
             }
           }
         },

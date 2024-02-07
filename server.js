@@ -214,9 +214,16 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
   const collection = req.collection;
   const searchTerm = req.params.searchTerm;
 
-  // Perform a full-text search using a case-insensitive regex
+  // Perform a full-text search using a case-insensitive regex for partial matches
   collection
-    .find({ $text: { $search: searchTerm, $caseSensitive: false } })
+    .find({
+      $or: [
+        { name: { $regex: searchTerm, $options: 'i' } },
+        { code: { $regex: searchTerm, $options: 'i' } },
+        { teacher: { $regex: searchTerm, $options: 'i' } },
+        { location: { $regex: searchTerm, $options: 'i' } }
+      ]
+    })
     .toArray((err, results) => {
       if (err) {
         console.error("ERROR:", err);
@@ -227,6 +234,7 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
       }
     });
 });
+
 
 // ... Your existing server.js code ...
 
