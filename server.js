@@ -72,6 +72,7 @@ app.get("/", (req, res) => {
   res.send(
     "Hello! Select a MongoDB collection, ex: /collection/Lessons or /collection/Orders"
   );
+  console.log(__dirname);
 });
 
 app.param("collectionName", (req, res, next, collectionName) => {
