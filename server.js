@@ -41,13 +41,13 @@ MongoClient.connect(
       });
 
       // Log the indexes
-      db.collection("Lessons").getIndexes((err, indexes) => {
-        if (err) {
-          console.error("Error getting indexes:", err);
-        } else {
-          console.log("Lesson Collection Indexes:", indexes);
-        }
-      });
+      // db.collection("Lessons").getIndexes((err, indexes) => {
+      //   if (err) {
+      //     console.error("Error getting indexes:", err);
+      //   } else {
+      //     console.log("Lesson Collection Indexes:", indexes);
+      //   }
+      // });
 
       console.log("Connected to MongoDB");
     }
