@@ -33,25 +33,36 @@ MongoClient.connect(
     } else {
       db = client.db("CW2");
       // Create a compound text index on 'name', 'code', 'teacher', and 'location' fields
-      db.collection("Lessons").createIndex({ name: "text", code: "text", teacher: "text", location: "text" });
+      db.collection("Lessons").createIndex({
+        name: "text",
+        code: "text",
+        teacher: "text",
+        location: "text"
+      });
+
+      // Log the indexes
+      db.collection("Lessons").getIndexes((err, indexes) => {
+        if (err) {
+          console.error("Error getting indexes:", err);
+        } else {
+          console.log("Lesson Collection Indexes:", indexes);
+        }
+      });
+
       console.log("Connected to MongoDB");
     }
   }
 );
-
-
-
 
 app.use((req, res, next) => {
   console.log(`${new Date().toLocaleString()} - ${req.method} ${req.url}`);
   next();
 });
 
-app.use(function(req, res, next){
+app.use(function(req, res, next) {
   console.log(`${new Date().toLocaleString()} - ${req.method} ${req.url}`);
   next();
 });
-
 
 // Routes
 app.get("/", (req, res) => {
@@ -86,21 +97,18 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
   });
 });
 
-app.put('/collection/:collectionName/:id', (req, res, next) => {
+app.put("/collection/:collectionName/:id", (req, res, next) => {
   // Update the lesson with the new space value
   req.collection.update(
-      { _id: new ObjectID(req.params.id) },
-      { $set: { space: req.body.space } },
-      { safe: true, multi: false },
-      (e, result) => {
-          if (e) return next(e);
-          res.send(result.result.n === 1) ? { msg: 'success' } : { msg: 'error' };
-      }
+    { _id: new ObjectID(req.params.id) },
+    { $set: { space: req.body.space } },
+    { safe: true, multi: false },
+    (e, result) => {
+      if (e) return next(e);
+      res.send(result.result.n === 1) ? { msg: "success" } : { msg: "error" };
+    }
   );
 });
-
-
-
 
 app.delete("/collection/:collectionName/:id", (req, res, next) => {
   req.collection.deleteOne(
@@ -146,7 +154,9 @@ app.post("/order", (req, res, next) => {
           { $set: { space: newSpace } },
           (err, result) => {
             if (err) {
-              console.error(`Failed to update space for lesson with ID ${lessonId}`);
+              console.error(
+                `Failed to update space for lesson with ID ${lessonId}`
+              );
               reject(err);
             } else {
               resolve(result);
@@ -161,7 +171,9 @@ app.post("/order", (req, res, next) => {
       db.collection("Orders").insertOne(orderDetails, (e, results) => {
         if (e) {
           console.error("Error during order submission:", e);
-          res.status(500).json({ error: "Internal server error during order submission." });
+          res
+            .status(500)
+            .json({ error: "Internal server error during order submission." });
         } else {
           res.status(200).json({ message: "Order submitted successfully!" });
           console.log("Order submitted");
@@ -170,10 +182,11 @@ app.post("/order", (req, res, next) => {
     })
     .catch(error => {
       console.error("Error during order submission:", error);
-      res.status(500).json({ error: "Internal server error during order submission." });
+      res
+        .status(500)
+        .json({ error: "Internal server error during order submission." });
     });
 });
-
 
 // // Function to update lesson spaces based on cart items
 // const updateLessonSpace = cartItems => {
