@@ -231,7 +231,7 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
         res.status(500).json({ error: "Internal server error during search." });
       } else {
         res.json(results);
-        console.log(results);
+        console.log("Search results are ", results);
       }
     });
 });
