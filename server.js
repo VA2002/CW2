@@ -23,6 +23,7 @@ app.use((req, res, next) => {
 let db;
 
 // Update the MongoDB connection string with your database name
+// Update the MongoDB connection string with your database name
 MongoClient.connect(
   "mongodb+srv://VA2002:VisheshArora2002@cluster0.rvb1dw1.mongodb.net",
   { useNewUrlParser: true, useUnifiedTopology: true },
@@ -31,10 +32,15 @@ MongoClient.connect(
       console.error("ERROR ", err);
     } else {
       db = client.db("CW2");
+      // Create a compound text index on 'name', 'code', 'teacher', and 'location' fields
+      db.collection("Lessons").createIndex({ name: "text", code: "text", teacher: "text", location: "text" });
       console.log("Connected to MongoDB");
     }
   }
 );
+
+
+
 
 app.use((req, res, next) => {
   console.log(`${new Date().toLocaleString()} - ${req.method} ${req.url}`);
