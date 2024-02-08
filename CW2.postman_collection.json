@@ -1,0 +1,195 @@
+{
+	"info": {
+		"_postman_id": "39e852c8-aa81-4165-bb21-863f05d13339",
+		"name": "CW2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32504665"
+	},
+	"item": [
+		{
+			"name": "Get Lessons",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/collection/Lessons",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"collection",
+						"Lessons"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Submit Order",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"fname\": \"Tester\",\r\n  \"mname\": \"Tester\",\r\n  \"lname\": \"Tester\",\r\n  \"studentid\": \"SHS4320\",\r\n  \"phone\": 4677844676764,\r\n  \"email\": \"test@gmail.com\",\r\n  \"cardno\": 345679097654333,\r\n  \"cvv\": 325,\r\n  \"cardexp\": \"2024-05-10\",\r\n  \"cartitems\": [\r\n    {\r\n      \"_id\": \"65b514f2c2a4fe1d2f4f9a4d\",\r\n      \"id\": 5,\r\n      \"code\": \"AS421\",\r\n      \"name\": \"Art\",\r\n      \"location\": \"Liverpool\",\r\n      \"price\": 90,\r\n      \"teacher\": \"Baplo Cipasso\",\r\n      \"space\": 3,\r\n      \"cartqty\": 2,\r\n      \"fontawsm\": \"<i id=\\\"Subjecticon\\\" class=\\\"fa-solid fa-palette\\\"></i>\"\r\n    }\r\n  ],\r\n  \"payment\": 180\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/order",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Space",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"space\": 4\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/collection/Lessons/65b50d54c2a4fe1d2f4f9a47",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"collection",
+						"Lessons",
+						"65b50d54c2a4fe1d2f4f9a47"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Lessons (Name)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/collection/Lessons/search/Art",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"collection",
+						"Lessons",
+						"search",
+						"Art"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Lessons (Location)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/collection/Lessons/search/London",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"collection",
+						"Lessons",
+						"search",
+						"London"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Lessons (Teacher)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/collection/Lessons/search/Ross",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"collection",
+						"Lessons",
+						"search",
+						"Ross"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Search Lessons (Code)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/collection/Lessons/search/AS4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"collection",
+						"Lessons",
+						"search",
+						"AS4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Show Logo",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/thelogo.png",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"thelogo.png"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

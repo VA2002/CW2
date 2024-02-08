@@ -12,7 +12,6 @@ app.set("port", portNum);
 // CORS Configuration
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  //res.setHeader("Access-Control-Allow-Origin", "https://va2002.github.io");
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
   //res.setHeader("Access-Control-Allow-Origin", "https://va2002.github.io/CW2");
@@ -166,6 +165,7 @@ app.post("/order", (req, res, next) => {
               reject(err);
             } else {
               resolve(result);
+              //console.log(result);
             }
           }
         );
