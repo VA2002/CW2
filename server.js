@@ -1,3 +1,4 @@
+//Calling all the required modules
 const express = require("express");
 const http = require("http");
 const path = require("path");
@@ -5,16 +6,16 @@ const app = express();
 const MongoClient = require("mongodb").MongoClient;
 const ObjectID = require("mongodb").ObjectID;
 
+//Setting up the middleware to parse JSON data
 app.use(express.json());
 const portNum = 3000;
 app.set("port", portNum);
 
-// CORS Configuration
+//CORS Configuration set up to allow cross-origin resource sharing
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-  //res.setHeader("Access-Control-Allow-Origin", "https://va2002.github.io/CW2");
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers"
@@ -22,16 +23,11 @@ app.use((req, res, next) => {
   next();
 });
 
+//Serving static files from the public directory
 app.use(express.static(path.join(__dirname, "public")));
 
-// app.get('*', (req, res) => {
-//   res.sendFile(path.join(__dirname, 'index.html'));
-// });
-
+//MongoDB connection being set up
 let db;
-
-// Update the MongoDB connection string with your database name
-// Update the MongoDB connection string with your database name
 MongoClient.connect(
   "mongodb+srv://VA2002:VisheshArora2002@cluster0.rvb1dw1.mongodb.net",
   { useNewUrlParser: true, useUnifiedTopology: true },
@@ -40,39 +36,25 @@ MongoClient.connect(
       console.error("ERROR ", err);
     } else {
       db = client.db("CW2");
-      // Create a compound text index on 'name', 'code', 'teacher', and 'location' fields
+      //Create a compound text index on 'name', 'code', 'teacher', and 'location' fields to allow search function to work based on these
       db.collection("Lessons").createIndex({
         name: "text",
         code: "text",
         teacher: "text",
         location: "text"
       });
-
-      // Log the indexes
-      // db.collection("Lessons").getIndexes((err, indexes) => {
-      //   if (err) {
-      //     console.error("Error getting indexes:", err);
-      //   } else {
-      //     console.log("Lesson Collection Indexes:", indexes);
-      //   }
-      // });
-
       console.log("Connected to MongoDB");
     }
   }
 );
 
+//Logger middleware to log incoming requests
 app.use((req, res, next) => {
   console.log(`${new Date().toLocaleString()} - ${req.method} ${req.url}`);
   next();
 });
 
-// app.use(function(req, res, next) {
-//   console.log(`${new Date().toLocaleString()} - ${req.method} ${req.url}`);
-//   next();
-// });
-
-// Routes
+//Route to root endpoint
 app.get("/", (req, res) => {
   res.send(
     "Hello! Select a MongoDB collection, ex: /collection/Lessons or /collection/Orders"
@@ -80,11 +62,13 @@ app.get("/", (req, res) => {
   console.log(__dirname);
 });
 
+//Middleware to handle collection name parameter
 app.param("collectionName", (req, res, next, collectionName) => {
   req.collection = db.collection(collectionName);
   return next();
 });
 
+//Route to get all documents from a collection (to display all lessons)
 app.get("/collection/:collectionName", (req, res, next) => {
   req.collection.find({}).toArray((e, results) => {
     if (e) return next(e);
@@ -92,6 +76,7 @@ app.get("/collection/:collectionName", (req, res, next) => {
   });
 });
 
+//Route to insert a new document into a collection (meant for storing orders)
 app.post("/collection/:collectionName", (req, res, next) => {
   req.collection.insert(req.body, (e, results) => {
     if (e) return next(e);
@@ -99,6 +84,7 @@ app.post("/collection/:collectionName", (req, res, next) => {
   });
 });
 
+//Route to retrieve a document by ID from a collection
 app.get("/collection/:collectionName/:id", (req, res, next) => {
   req.collection.findOne({ _id: new ObjectID(req.params.id) }, (e, results) => {
     if (e) return next(e);
@@ -106,8 +92,8 @@ app.get("/collection/:collectionName/:id", (req, res, next) => {
   });
 });
 
+//Route to update lesson's space value after order is placed
 app.put("/collection/:collectionName/:id", (req, res, next) => {
-  // Update the lesson with the new space value
   req.collection.update(
     { _id: new ObjectID(req.params.id) },
     { $set: { space: req.body.space } },
@@ -119,17 +105,9 @@ app.put("/collection/:collectionName/:id", (req, res, next) => {
   );
 });
 
-app.delete("/collection/:collectionName/:id", (req, res, next) => {
-  req.collection.deleteOne(
-    { _id: new ObjectID(req.params.id) },
-    (e, result) => {
-      if (e) return next(e);
-      res.send(result.result.n === 1 ? { msg: "Success" } : { msg: "error" });
-    }
-  );
-});
-
+//Route to handle order submission
 app.post("/order", (req, res, next) => {
+  // Extract order details from the request body
   const orderDetails = {
     fname: req.body.fname,
     mname: req.body.mname,
@@ -144,19 +122,18 @@ app.post("/order", (req, res, next) => {
     payment: req.body.payment
   };
 
-  // Get the lesson IDs and corresponding updated spaces from the order details
+  //Extract lesson IDs and corresponding updated spaces from the order details
   const lessonUpdates = req.body.cartitems.map(cartItem => ({
     _id: new ObjectID(cartItem.lessonId),
     space: cartItem.space
   }));
 
-  // Update lesson spaces in the Lessons collection
+  //Update lesson spaces in the Lessons collection and handle order submission
   Promise.all(
     lessonUpdates.map(lessonUpdate => {
       const lessonId = lessonUpdate._id;
       const newSpace = lessonUpdate.space;
 
-      // Update the lesson's space in the database
       return new Promise((resolve, reject) => {
         db.collection("Lessons").updateOne(
           { _id: lessonId },
@@ -169,7 +146,6 @@ app.post("/order", (req, res, next) => {
               reject(err);
             } else {
               resolve(result);
-              //console.log(result);
             }
           }
         );
@@ -177,7 +153,6 @@ app.post("/order", (req, res, next) => {
     })
   )
     .then(() => {
-      // Insert the order details into the Orders collection
       db.collection("Orders").insertOne(orderDetails, (e, results) => {
         if (e) {
           console.error("Error during order submission:", e);
@@ -198,46 +173,24 @@ app.post("/order", (req, res, next) => {
     });
 });
 
-// // Function to update lesson spaces based on cart items
-// const updateLessonSpace = cartItems => {
-//   const updatePromises = cartItems.map(cartItem => {
-//     const lessonId = cartItem.lessonId;
-//     const quantity = cartItem.quantity;
-
-//     // Prepare the updated space object
-//     const spaceUpdate = { $inc: { space: -quantity } };
-
-//     // Sending a PUT request to update lesson space
-//     return req.collection.updateOne(
-//       { _id: new ObjectID(lessonId) },
-//       spaceUpdate
-//     );
-//   });
-
-//   // Wait for all updates to complete
-//   return Promise.all(updatePromises);
-// };
-
-// ... Your existing server.js code ...
-
+//Route to search for lessons based on lesson name, code, teacher or location
 app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
   const collection = req.collection;
   const searchTerm = req.params.searchTerm;
 
-  // Perform a full-text search using a case-insensitive regex for partial matches
+  //Perform a case-insensitive regex search for partial matches
   collection
     .find({
       $or: [
-        { name: { $regex: searchTerm, $options: 'i' } },
-        { code: { $regex: searchTerm, $options: 'i' } },
-        { teacher: { $regex: searchTerm, $options: 'i' } },
-        { location: { $regex: searchTerm, $options: 'i' } }
+        { name: { $regex: searchTerm, $options: "i" } },
+        { code: { $regex: searchTerm, $options: "i" } },
+        { teacher: { $regex: searchTerm, $options: "i" } },
+        { location: { $regex: searchTerm, $options: "i" } }
       ]
     })
     .toArray((err, results) => {
       if (err) {
         console.error("ERROR:", err);
-        // Send a meaningful error response
         res.status(500).json({ error: "Internal server error during search." });
       } else {
         res.json(results);
@@ -246,16 +199,10 @@ app.get("/collection/:collectionName/search/:searchTerm", (req, res, next) => {
     });
 });
 
-
-// ... Your existing server.js code ...
-
-// ... Your existing server.js code ...
-
+//Start the server on the specified port. This is done for AWS.
 const port = process.env.PORT || portNum;
 
-//http.createServer(app).listen(port);
-
-// Start the server on port 8000
+//Listen to this port
 app.listen(port, () => {
   console.log("Running on Port " + portNum);
 });
