@@ -1,3 +1,4 @@
+@@ -0,0 +1,665 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -39,7 +40,7 @@
               <i class="fa-solid fa-cart-shopping"></i>
             </button>
             <br />
-            <img id="Websitelogo" src="/thelogo.png" alt="Logo" />
+            <img id="Websitelogo" src="/thelogo.png" alt = "Logo" />
           </div>
           <br />
           <br />
@@ -232,7 +233,7 @@
           <br />
           &nbsp;&nbsp;
           <b>To be paid&nbsp;:</b>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
           <!--Total amount to be paid for all items in the cart, calculated from a function in computed-->
           £ {{ totalAmt }} <br /><br /><br /><br />
           <center>
@@ -351,11 +352,12 @@
         </div>
       </div>
     </div>
+    <!--Data that will be loaded on the Vue app-->
+    <!--Data that will be loaded on the Vue app-->
     <script type="text/javascript">
-      // Introducing the VueJS Instance
+      // Introducing the VueJS App
       const AfterSchool = new Vue({
         el: "#App",
-        //Includes data that will be recorded
         data: {
           sitename: "Strawgoh | After School Classes Portal",
           lessons: [],
@@ -384,18 +386,17 @@
           cardno: "",
           cardexp: "",
           cvv: "",
+          //maxSpace: 5,
           searchTerm: "",
           showProductPage: true,
           showCartPage: false,
           showCheckoutPage: false
         },
-        //Observe the changes in search function
         watch: {
           searchTerm: function(newSearchTerm, oldSearchTerm) {
             this.searchClasses();
           }
         },
-        //Contains all methods
         methods: {
           addToCart(classItem) {
             if (classItem.cartqty === 0) {
@@ -408,36 +409,32 @@
               classItem.space--;
             }
 
-            //Update payment to reflect the total amount
+            // Update payment to reflect the total amount
             this.payment = this.totalAmt;
           },
-          //Deletes items from cart
           deleteFromCart(index) {
             const deleted = this.cart[index];
-            //Find the item to delete
             const classItem = this.lessons.find(
               item => item._id === deleted._id
             );
-            //Given the item exists in cart
+
             if (classItem) {
               // Update newSpace to include the quantity in the cart
               const newSpace = classItem.space + deleted.cartqty;
               classItem.space = newSpace;
               classItem.cartqty = 0;
-              console.log(
-                `${classItem.space} + ${deleted.cartqty} = ${newSpace}`
-              );
+              console.log(`${classItem.space} + ${deleted.cartqty} = ${newSpace}`);
             }
-            //Remove the item from cart array
+
             this.cart.splice(index, 1);
 
-            //Update payment to reflect the total amount
+            // Update payment to reflect the total amount
             this.payment = this.totalAmt;
 
-            //Call updateLessonSpace to update lesson spaces
+            // Call updateLessonSpace to update lesson spaces
             this.updateLessonSpace();
           },
-          //Sorting functions for subject name, location, price, teacher name, and space (both ascending and descending)
+
           nameAsc() {
             this.lessons.sort((a, b) => a.name.localeCompare(b.name));
           },
@@ -468,9 +465,7 @@
           spaceDesc() {
             this.lessons.sort((a, b) => b.space - a.space);
           },
-          //To display the lessons. Uses GET.
           fetchClasses() {
-            //Fetch API retrieving data from AWS server
             fetch(
               "http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/Lessons"
             )
@@ -478,62 +473,25 @@
               .then(data => {
                 this.lessons = data;
               })
-              //Exception handling to address errors
               .catch(error =>
                 console.log("There seems to be an error: ", error)
               );
           },
           searchClasses() {
             const searchTerm = this.searchTerm.toLowerCase();
-
-            if (!searchTerm) {
-              this.fetchClasses(); // If the search term is empty, fetch all classes
-            } else {
-              // Use Fetch API to perform search based on the search term
-              fetch(
-                `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/Lessons/search/${searchTerm}`
-              )
-                .then(response => response.json())
-                .then(data => {
-                  this.lessons = data;
-                })
-                .catch(error => {
-                  console.error("Error during search:", error);
-                });
-            }
-          },
-          performSearch() {
-            // To ensure search is not case sensitive
-            const searchTerm = this.searchTerm.toLowerCase();
-
-            // In case there is no search term
             if (!searchTerm) {
               this.fetchClasses();
-            }
-            // If there is a search term, make a request to the backend to fetch results
-            else {
-              const collectionName = "Lessons"; // replace with your actual collection name
-              fetch(
-                `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/${collectionName}/search/${searchTerm}`
-              )
-                .then(response => {
-                  if (!response.ok) {
-                    throw new Error("Network response was not ok");
-                  }
-                  return response.json();
-                })
-                .then(data => {
-                  // Update the classes array with the search results from the backend
-                  this.classes = data;
-                  console.log("Results: \n", data);
-                })
-                .catch(error => {
-                  console.error("Error fetching search results:", error);
-                  // Handle error (e.g., show an error message to the user)
-                });
+            } else {
+              this.lessons = this.lessons.filter(classItem => {
+                return (
+                  classItem.name.toLowerCase().includes(searchTerm) ||
+                  classItem.code.toLowerCase().includes(searchTerm) ||
+                  classItem.location.toLowerCase().includes(searchTerm) ||
+                  classItem.teacher.toLowerCase().includes(searchTerm)
+                );
+              });
             }
           },
-
           showTheCartPage() {
             this.showProductPage = !this.showProductPage;
             this.showCartPage = !this.showCartPage;
@@ -594,47 +552,113 @@
                 return response.json();
               })
               .then(data => {
-                console.log("Order submitted successfully:", data);
-                // Clear cart and reset payment after successful submission
+                console.log("Order submitted successfully: ", data);
+
+                // Update lesson space after order submission
+                this.cart.forEach(item => {
+                  this.updateLessonSpace(item._id, item.cartqty);
+                });
+
+                // Clear the cart after a successful order
                 this.cart = [];
-                this.payment = 0;
-                // You may want to show a success message or redirect the user
+                alert("Submitted");
+                this.orders.push(this.submission);
+
+                // Add any further actions you want to perform after successful submission
+
+                // Reset the form or perform any other necessary actions
+                // this.resetForm();
               })
               .catch(error => {
-                console.error("Error submitting order:", error);
-                // You may want to show an error message to the user
+                console.log("Error submitting order: ", error.message);
+                // Handle the error appropriately
               });
           },
-          updateLessonSpace() {
-            // Iterate through cart and update lesson space
-            this.cart.forEach(cartItem => {
-              const classItem = this.lessons.find(
-                item => item._id === cartItem._id
-              );
 
-              if (classItem) {
-                // Update newSpace to include the quantity in the cart
-                const newSpace = classItem.space + cartItem.cartqty;
-                classItem.space = newSpace;
-                console.log(
-                  `${classItem.space} + ${cartItem.cartqty} = ${newSpace}`
-                );
-              }
-            });
+          updateLessonSpace(lessonId, cartQuantity) {
+            // Fetch the lesson details for the given lessonId
+            fetch(
+              `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/Lessons/${lessonId}`
+            )
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+              })
+              .then(lesson => {
+                // Calculate the new space value based on the cart quantity
+                const newSpaceValue = lesson.space - cartQuantity;
+
+                // Update the lesson space using a PUT request
+                fetch(
+                  `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/Lessons/${lessonId}`,
+                  {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ space: newSpaceValue })
+                  }
+                )
+                  .then(response => response.json())
+                  .then(data => {
+                    console.log("Lesson space updated successfully:", data);
+                  })
+                  .catch(error => {
+                    console.error("Error updating lesson space:", error);
+                  });
+              })
+              .catch(error => {
+                console.error("Error fetching lesson details:", error);
+              });
+          },
+
+          performSearch() {
+            // To ensure search is not case sensitive
+            const searchTerm = this.searchTerm.toLowerCase();
+
+            // In case there is no search term
+            if (!searchTerm) {
+              this.fetchClasses();
+            }
+            // If there is a search term, make a request to the backend to fetch results
+            else {
+              const collectionName = "Lessons"; // replace with your actual collection name
+              fetch(
+                `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/${collectionName}/search/${searchTerm}`
+              )
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                  }
+                  return response.json();
+                })
+                .then(data => {
+                  // Update the classes array with the search results from the backend
+                  this.classes = data;
+                  console.log("Results: \n", data);
+                })
+                .catch(error => {
+                  console.error("Error fetching search results:", error);
+                  // Handle error (e.g., show an error message to the user)
+                });
+            }
           }
         },
+        created() {
+          this.fetchClasses();
+        },
         computed: {
+          cartItemCount() {
+            return this.cart.length;
+          },
           totalAmt() {
-            // Calculate the total amount based on cart items
             return this.cart.reduce(
               (total, cartItem) => total + cartItem.price * cartItem.cartqty,
               0
             );
           }
-        },
-        mounted() {
-          // Fetch classes when the Vue app is mounted
-          this.fetchClasses();
         }
       });
     </script>
