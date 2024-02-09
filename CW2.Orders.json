@@ -1,0 +1,43 @@
+[{
+  "_id": {
+    "$oid": "65c5d59b094c166fbecc87da"
+  },
+  "fname": "Vishesh",
+  "mname": "",
+  "lname": "Arora",
+  "studentid": "SHS2002",
+  "phone": 565753015,
+  "email": "iamvishesharora@gmail.com",
+  "cardno": {
+    "$numberLong": "34096490634095"
+  },
+  "cvv": 492,
+  "cardexp": "2024-08-12",
+  "cartitems": [
+    {
+      "_id": "65b514f2c2a4fe1d2f4f9a4d",
+      "id": 5,
+      "code": "AS421",
+      "name": "Art",
+      "location": "Liverpool",
+      "price": 90,
+      "teacher": "Baplo Cipasso",
+      "space": 4,
+      "cartqty": 1,
+      "fontawsm": "<i id=\"Subjecticon\" class=\"fa-solid fa-palette\"></i>"
+    },
+    {
+      "_id": "65b51784c2a4fe1d2f4f9a5d",
+      "id": 13,
+      "code": "AS742",
+      "name": "Economics",
+      "location": "London",
+      "price": 95,
+      "teacher": "Ted DeBiase",
+      "space": 3,
+      "cartqty": 2,
+      "fontawsm": "<i id=\"Subjecticon\" class=\"fa-solid fa-money-bill-trend-up\"></i>"
+    }
+  ],
+  "payment": 280
+}]
