@@ -502,6 +502,38 @@
                 });
             }
           },
+          performSearch() {
+            // To ensure search is not case sensitive
+            const searchTerm = this.searchTerm.toLowerCase();
+
+            // In case there is no search term
+            if (!searchTerm) {
+              this.fetchClasses();
+            }
+            // If there is a search term, make a request to the backend to fetch results
+            else {
+              const collectionName = "Lessons"; // replace with your actual collection name
+              fetch(
+                `http://strawgoh-env.eba-cvaibfiv.eu-west-2.elasticbeanstalk.com/collection/${collectionName}/search/${searchTerm}`
+              )
+                .then(response => {
+                  if (!response.ok) {
+                    throw new Error("Network response was not ok");
+                  }
+                  return response.json();
+                })
+                .then(data => {
+                  // Update the classes array with the search results from the backend
+                  this.classes = data;
+                  console.log("Results: \n", data);
+                })
+                .catch(error => {
+                  console.error("Error fetching search results:", error);
+                  // Handle error (e.g., show an error message to the user)
+                });
+            }
+          },
+
           showTheCartPage() {
             this.showProductPage = !this.showProductPage;
             this.showCartPage = !this.showCartPage;
